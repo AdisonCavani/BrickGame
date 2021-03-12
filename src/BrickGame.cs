@@ -107,16 +107,22 @@ namespace BrickGame
         public bool coin1NewLoop = true;
 
         // Sounds
-        SoundEffect effect;
-        Song song;
+        SoundEffect coinSoundFX;
+        SoundEffect lostLifeSoundFX;
+        SoundEffect gameOverSoundFX;
+        Song obvilonSoundtrack;
 
         double fps;
         SpriteFont notoSansBold;
 
         // Resolution
-        Matrix Scale;
-        const int TargetWidth = 1024;
-        const int TargetHeight = 576;
+        public float ResolutionTargetWidth;
+        public float ResolutionTargetHeight;
+        public float ResolutionNativeWidth;
+        public float ResolutionNativeHeight;
+        public float scaleX;
+        public float scaleY;
+        Matrix ResolutionScale;
 
         public BrickGame()
         {
@@ -130,10 +136,6 @@ namespace BrickGame
         {
             // TODO: Add your initialization logic here
 
-            float scaleX = _graphics.PreferredBackBufferWidth / TargetWidth;
-            float scaleY = _graphics.PreferredBackBufferHeight / TargetHeight;
-            Scale = Matrix.CreateScale(new Vector3(scaleX, scaleY, 1));
-
             base.Initialize();
         }
 
@@ -144,13 +146,22 @@ namespace BrickGame
 
             // TODO: use this.Content to load your game content here
 
-            _scoreManager = ScoreManager.Load();
-
-
             // Game resolution
-            _graphics.PreferredBackBufferWidth = 1280;
-            _graphics.PreferredBackBufferHeight = 720;
-            _graphics.IsFullScreen = false;
+            ResolutionTargetWidth = GraphicsDevice.DisplayMode.Width;
+            ResolutionTargetHeight = GraphicsDevice.DisplayMode.Height;
+
+            _graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width; // Target resolution
+            _graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height; // Target resolution
+
+            //GraphicsDevice.DisplayMode.Width
+            ResolutionNativeWidth = 1920; // Autodetection of current resolution
+            ResolutionNativeHeight = 1080; // Autodetection of current resolution
+
+            scaleX = (float)_graphics.PreferredBackBufferWidth / ResolutionNativeWidth;
+            scaleY = (float)_graphics.PreferredBackBufferHeight / ResolutionNativeHeight;
+            ResolutionScale = Matrix.CreateScale(scaleX, scaleY, 1.0f);
+
+            _graphics.IsFullScreen = true; // Enable / disable fullscreen
             _graphics.ApplyChanges();
 
             // Background loading
@@ -183,8 +194,8 @@ namespace BrickGame
             bigCloud2Pos.Y = 200;
 
             // Hero starting position
-            heroPos.X = 640;
-            heroPos.Y = 479;
+            heroPos.X = ResolutionNativeWidth / 2;
+            heroPos.Y = 717;
             startY = heroPos.Y;
 
             // Brick loading
@@ -205,11 +216,16 @@ namespace BrickGame
             healthPos.Y = 20;
 
             // Sound
-            effect = Content.Load<SoundEffect>("sounds\\CoinSoundFX");
-            song = Content.Load<Song>("sounds\\ObvilonSoundtrack");
+            coinSoundFX = Content.Load<SoundEffect>("sounds\\CoinSoundFX");
+            lostLifeSoundFX = Content.Load<SoundEffect>("sounds\\LostLifeSoundFX");
+            gameOverSoundFX = Content.Load<SoundEffect>("sounds\\GameOverSoundFX");
+            obvilonSoundtrack = Content.Load<Song>("sounds\\ObvilonSoundtrack");
 
-            //MediaPlayer.Play(song);
-            //MediaPlayer.IsRepeating = true;
+            MediaPlayer.Play(obvilonSoundtrack);
+            MediaPlayer.IsRepeating = true;
+
+            // HighScore manger
+            _scoreManager = ScoreManager.Load();
 
         }
 
@@ -224,6 +240,8 @@ namespace BrickGame
 
             if (life <= 0)
             {
+                gameOverSoundFX.Play();
+
                 // ScoreManager
                 _scoreManager.Add(new Score()
                 {
@@ -251,7 +269,7 @@ namespace BrickGame
 
             if (klawisz.IsKeyDown(Keys.Right) || klawisz.IsKeyDown(Keys.D))
             {
-                if (heroPos.X < 1220)
+                if (heroPos.X <= (ResolutionTargetWidth - 70))
                 {
                     heroPos.X += 5;
                     hero = Content.Load<Texture2D>("textures\\heroRight");
@@ -297,7 +315,7 @@ namespace BrickGame
 
             brick1Pos.Y += brick1Speed;
 
-            if (brick1Pos.Y > 780)
+            if (brick1Pos.Y > ResolutionNativeHeight)
             {
                 score++;
                 brick1NewLoop = true;
@@ -315,7 +333,7 @@ namespace BrickGame
 
             brick2Pos.Y += brick2Speed;
 
-            if (brick2Pos.Y > 780)
+            if (brick2Pos.Y > ResolutionNativeHeight)
             {
                 score++;
                 brick2NewLoop = true;
@@ -333,7 +351,7 @@ namespace BrickGame
 
             brick3Pos.Y += brick3Speed;
 
-            if (brick3Pos.Y > 780)
+            if (brick3Pos.Y > ResolutionNativeHeight)
             {
                 score++;
                 brick3NewLoop = true;
@@ -352,7 +370,7 @@ namespace BrickGame
 
             coin1Pos.Y += coin1Speed;
 
-            if (coin1Pos.Y > 720)
+            if (coin1Pos.Y > ResolutionNativeHeight)
             {
                 coin1NewLoop = true;
             }
@@ -367,6 +385,10 @@ namespace BrickGame
             {
                 brick1NewLoop = true;
                 life -= 1;
+                if (life >= 1)
+                {
+                    lostLifeSoundFX.Play();
+                }
             }
 
             // Brick 2
@@ -374,6 +396,10 @@ namespace BrickGame
             {
                 brick2NewLoop = true;
                 life -= 1;
+                if (life >= 1)
+                {
+                    lostLifeSoundFX.Play();
+                }
             }
 
             // Brick3
@@ -381,6 +407,10 @@ namespace BrickGame
             {
                 brick3NewLoop = true;
                 life -= 1;
+                if (life >= 1)
+                {
+                    lostLifeSoundFX.Play();
+                }
             }
 
             // Coin1
@@ -388,7 +418,10 @@ namespace BrickGame
             {
                 coin1NewLoop = true;
                 score += 10;
-                effect.Play();
+                if (life >= 1)
+                {
+                    coinSoundFX.Play();
+                }
             }
             // End of "Colision"
 
@@ -409,7 +442,7 @@ namespace BrickGame
                     heroElapsed = 0;
                 }
             }
-            heroAnim = new Rectangle(48 * heroFrames, 0, 48, 70);
+            heroAnim = new Rectangle(72 * heroFrames, 0, 72, 105);
             // End of "Hero animation"
 
 
@@ -442,37 +475,37 @@ namespace BrickGame
 
             // Cloud animation
             smallCloud1Pos.X += 1;
-            if (smallCloud1Pos.X > 1280)
+            if (smallCloud1Pos.X > ResolutionNativeWidth)
             {
                 smallCloud1Pos.X = -120;
             }
 
             smallCloud2Pos.X += 1;
-            if (smallCloud2Pos.X > 1280)
+            if (smallCloud2Pos.X > ResolutionNativeWidth)
             {
                 smallCloud2Pos.X = -120;
             }
 
             bigCloud1Pos.X += 1;
-            if (bigCloud1Pos.X > 1280)
+            if (bigCloud1Pos.X > ResolutionNativeWidth)
             {
                 bigCloud1Pos.X = -120;
             }
 
             bigCloud2Pos.X += 1;
-            if (bigCloud2Pos.X > 1280)
+            if (bigCloud2Pos.X > ResolutionNativeWidth)
             {
                 bigCloud2Pos.X = -120;
             }
 
             smallCloudMirrorPos.X += 1;
-            if (smallCloudMirrorPos.X > 1280)
+            if (smallCloudMirrorPos.X > ResolutionNativeWidth)
             {
                 smallCloudMirrorPos.X = -120;
             }
 
             bigCloud3Pos.X += 1;
-            if (bigCloud3Pos.X > 1280)
+            if (bigCloud3Pos.X > ResolutionNativeWidth)
             {
                 bigCloud3Pos.X = -120;
             }
@@ -489,7 +522,8 @@ namespace BrickGame
 
             // TODO: Add your drawing code here
 
-            _spriteBatch.Begin();
+            //_spriteBatch.Begin(transformMatrix: ResolutionScale);
+            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, ResolutionScale);
             _spriteBatch.Draw(background1, background1Pos, Color.White);
             _spriteBatch.Draw(smallCloudMirror, smallCloudMirrorPos, Color.White);
             _spriteBatch.Draw(bigCloud3, bigCloud3Pos, Color.White);
@@ -504,9 +538,13 @@ namespace BrickGame
             _spriteBatch.Draw(brick3, brick3Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(coin1, coin1Pos, coinAnim, Color.White);
             _spriteBatch.DrawString(font, "Score: " + score, new Vector2(20, 70), Color.Black);
-            _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2(1190, 10), Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
+            _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2((ResolutionNativeWidth - 85), 10), Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.DrawString(font, "Highscores:\n" + string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + ": " + c.Value).ToArray()), new Vector2(20, 100), Color.Black);
             _spriteBatch.Draw(health, healthPos, lifeAnim, Color.White);
+
+            // Used for debugging, e.g.: printing value
+            //_spriteBatch.DrawString(font, "Debug: " + ResolutionTargetHeight, new Vector2(20, 720), Color.Black);
+
             _spriteBatch.End();
 
             base.Draw(gameTime);

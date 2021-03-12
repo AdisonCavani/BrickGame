@@ -33,6 +33,18 @@
 /processorParam:Quality=Best
 /build:assets/sounds/CoinSoundFX.wav
 
+#begin assets/sounds/GameOverSoundFX.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/GameOverSoundFX.wav
+
+#begin assets/sounds/LostLifeSoundFX.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:assets/sounds/LostLifeSoundFX.wav
+
 #begin assets/sounds/ObvilonSoundtrack.mp3
 /importer:Mp3Importer
 /processor:SongProcessor
