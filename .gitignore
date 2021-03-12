@@ -4,6 +4,7 @@
 .vs/
 src/bin/
 src/obj/
+src/obj/Debug/net5.0/
 src/Content/bin/
 src/Content/obj/
-*.cache
+
