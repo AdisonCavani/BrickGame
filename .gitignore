@@ -2,7 +2,7 @@
 *.exe
 *.cache
 .vs/
-src/bin
-src/obj
-src/Content/bin
-src/Content/obj
+src/bin/
+src/obj/
+src/Content/bin/
+src/Content/obj/
