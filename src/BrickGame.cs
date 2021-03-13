@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using BrickGame.Draw;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;

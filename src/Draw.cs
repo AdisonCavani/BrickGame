@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BrickGame
+namespace BrickGame.Draw
 {
     // Bricks
     class DrawBrickSpeed
@@ -43,21 +43,21 @@ namespace BrickGame
         public int Position1()
         {
             Random rnd = new Random();
-            int position1 = rnd.Next(10, 1210);
+            int position1 = rnd.Next(10, 1850);
             return position1;
         }
 
         public int Position2()
         {
             Random rnd = new Random();
-            int position2 = rnd.Next(10, 1210);
+            int position2 = rnd.Next(10, 1850);
             return position2;
         }
 
         public int Position3()
         {
             Random rnd = new Random();
-            int position3 = rnd.Next(10, 1210);
+            int position3 = rnd.Next(10, 1850);
             return position3;
         }
         // End of "Generate random horizontal position (X axis)"
@@ -86,7 +86,7 @@ namespace BrickGame
         public int Position1()
         {
             Random rnd = new Random();
-            int position1 = rnd.Next(10, 1210);
+            int position1 = rnd.Next(10, 1850);
             return position1;
         }
         // End of "Generate random horizontal position (X axis)"
