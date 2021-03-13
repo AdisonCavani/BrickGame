@@ -113,6 +113,7 @@ namespace BrickGame
         Song obvilonSoundtrack;
 
         double fps;
+        bool showFPS;
         SpriteFont notoSansBold;
 
         // Resolution
@@ -130,6 +131,7 @@ namespace BrickGame
             _graphics.SynchronizeWithVerticalRetrace = false; // Disable V-Sync
             IsFixedTimeStep = true; // Cap FPS to 60
             IsMouseVisible = true;
+            showFPS = true; // Show FPS
         }
 
         protected override void Initialize()
@@ -537,10 +539,14 @@ namespace BrickGame
             _spriteBatch.Draw(brick2, brick2Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(brick3, brick3Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(coin1, coin1Pos, coinAnim, Color.White);
-            _spriteBatch.DrawString(font, "Score: " + score, new Vector2(20, 70), Color.Black);
-            _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2((ResolutionNativeWidth - 85), 10), Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
-            _spriteBatch.DrawString(font, "Highscores:\n" + string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + ": " + c.Value).ToArray()), new Vector2(20, 100), Color.Black);
             _spriteBatch.Draw(health, healthPos, lifeAnim, Color.White);
+            _spriteBatch.DrawString(font, "Score: " + score, new Vector2(20, 70), Color.Black);
+            _spriteBatch.DrawString(font, "Highscores:\n" + string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + ": " + c.Value).ToArray()), new Vector2(20, 100), Color.Black);
+
+            if (showFPS == true)
+            {
+                _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2((ResolutionNativeWidth - 85), 10), Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
+            }
 
             // Used for debugging, e.g.: printing value
             //_spriteBatch.DrawString(font, "Debug: " + ResolutionTargetHeight, new Vector2(20, 720), Color.Black);
