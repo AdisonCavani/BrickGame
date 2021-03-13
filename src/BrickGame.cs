@@ -477,37 +477,37 @@ namespace BrickGame
             smallCloud1Pos.X += 1;
             if (smallCloud1Pos.X > ResolutionNativeWidth)
             {
-                smallCloud1Pos.X = -120;
+                smallCloud1Pos.X = -180;
             }
 
             smallCloud2Pos.X += 1;
             if (smallCloud2Pos.X > ResolutionNativeWidth)
             {
-                smallCloud2Pos.X = -120;
+                smallCloud2Pos.X = -180;
             }
 
             bigCloud1Pos.X += 1;
             if (bigCloud1Pos.X > ResolutionNativeWidth)
             {
-                bigCloud1Pos.X = -120;
+                bigCloud1Pos.X = -180;
             }
 
             bigCloud2Pos.X += 1;
             if (bigCloud2Pos.X > ResolutionNativeWidth)
             {
-                bigCloud2Pos.X = -120;
+                bigCloud2Pos.X = -180;
             }
 
             smallCloudMirrorPos.X += 1;
             if (smallCloudMirrorPos.X > ResolutionNativeWidth)
             {
-                smallCloudMirrorPos.X = -120;
+                smallCloudMirrorPos.X = -180;
             }
 
             bigCloud3Pos.X += 1;
             if (bigCloud3Pos.X > ResolutionNativeWidth)
             {
-                bigCloud3Pos.X = -120;
+                bigCloud3Pos.X = -180;
             }
             // End of "Cloud animation"
 
