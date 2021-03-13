@@ -4,11 +4,17 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using BrickGame.States;
 
 namespace BrickGame
 {
     public class BrickGame : Game
     {
+        #region New variables
+
+        private State _currentState;
+        private State _nextState;
+
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
@@ -123,6 +129,13 @@ namespace BrickGame
         public float scaleX;
         public float scaleY;
         Matrix ResolutionScale;
+        
+        #endregion
+
+        public void ChangeState(State state)
+        {
+            _nextState = state;
+        }
 
         public BrickGame()
         {
@@ -142,9 +155,15 @@ namespace BrickGame
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            Content.RootDirectory = "Content\\assets";
+            Content.RootDirectory = "Content";
 
             // TODO: use this.Content to load your game content here
+
+            #region Menu States
+
+            _currentState = new MenuState(this, _graphics.GraphicsDevice, Content);
+
+            #endregion
 
             // Game resolution
             ResolutionTargetWidth = GraphicsDevice.DisplayMode.Width;
@@ -165,31 +184,31 @@ namespace BrickGame
             _graphics.ApplyChanges();
 
             // Background loading
-            background1 = Content.Load<Texture2D>("textures\\background1_blue");
-            smallCloudMirror = Content.Load<Texture2D>("textures\\smallCloudMirror");
+            background1 = Content.Load<Texture2D>("assets\\textures\\background1_blue");
+            smallCloudMirror = Content.Load<Texture2D>("assets\\textures\\smallCloudMirror");
             smallCloudMirrorPos.X = -880;
             smallCloudMirrorPos.Y = 190;
 
-            bigCloud3 = Content.Load<Texture2D>("textures\\bigCloud");
+            bigCloud3 = Content.Load<Texture2D>("assets\\textures\\bigCloud");
             bigCloud3Pos.X = -575;
             bigCloud3Pos.Y = 160;
 
-            background1Color = Content.Load<Texture2D>("textures\\background1");
-            hero = Content.Load<Texture2D>("textures\\heroStop");
+            background1Color = Content.Load<Texture2D>("assets\\textures\\background1");
+            hero = Content.Load<Texture2D>("assets\\textures\\heroStop");
 
-            smallCloud1 = Content.Load<Texture2D>("textures\\smallCloud");
+            smallCloud1 = Content.Load<Texture2D>("assets\\textures\\smallCloud");
             smallCloud1Pos.X = -100;
             smallCloud1Pos.Y = 100;
 
-            smallCloud2 = Content.Load<Texture2D>("textures\\smallCloud");
+            smallCloud2 = Content.Load<Texture2D>("assets\\textures\\smallCloud");
             smallCloud2Pos.X = -625;
             smallCloud2Pos.Y = 85;
 
-            bigCloud1 = Content.Load<Texture2D>("textures\\bigCloud");
+            bigCloud1 = Content.Load<Texture2D>("assets\\textures\\bigCloud");
             bigCloud1Pos.X = -300;
             bigCloud1Pos.Y = 280;
 
-            bigCloud2 = Content.Load<Texture2D>("textures\\bigCloud");
+            bigCloud2 = Content.Load<Texture2D>("assets\\textures\\bigCloud");
             bigCloud2Pos.X = -790;
             bigCloud2Pos.Y = 200;
 
@@ -199,27 +218,27 @@ namespace BrickGame
             startY = heroPos.Y;
 
             // Brick loading
-            brick1 = Content.Load<Texture2D>("textures\\brick1");
-            brick2 = Content.Load<Texture2D>("textures\\brick2");
-            brick3 = Content.Load<Texture2D>("textures\\brick3");
+            brick1 = Content.Load<Texture2D>("assets\\textures\\brick1");
+            brick2 = Content.Load<Texture2D>("assets\\textures\\brick2");
+            brick3 = Content.Load<Texture2D>("assets\\textures\\brick3");
 
             // Coin loading
-            coin1 = Content.Load<Texture2D>("textures\\coin");
+            coin1 = Content.Load<Texture2D>("assets\\textures\\coin");
 
             // Font loading
-            font = Content.Load<SpriteFont>("fonts\\Font");
-            notoSansBold = Content.Load<SpriteFont>("fonts\\notoSansBold");
+            font = Content.Load<SpriteFont>("assets\\fonts\\Font");
+            notoSansBold = Content.Load<SpriteFont>("assets\\fonts\\notoSansBold");
 
             // Health bar
-            health = Content.Load<Texture2D>("textures\\health");
+            health = Content.Load<Texture2D>("assets\\textures\\health");
             healthPos.X = 20;
             healthPos.Y = 20;
 
             // Sound
-            coinSoundFX = Content.Load<SoundEffect>("sounds\\CoinSoundFX");
-            lostLifeSoundFX = Content.Load<SoundEffect>("sounds\\LostLifeSoundFX");
-            gameOverSoundFX = Content.Load<SoundEffect>("sounds\\GameOverSoundFX");
-            obvilonSoundtrack = Content.Load<Song>("sounds\\ObvilonSoundtrack");
+            coinSoundFX = Content.Load<SoundEffect>("assets\\sounds\\CoinSoundFX");
+            lostLifeSoundFX = Content.Load<SoundEffect>("assets\\sounds\\LostLifeSoundFX");
+            gameOverSoundFX = Content.Load<SoundEffect>("assets\\sounds\\GameOverSoundFX");
+            obvilonSoundtrack = Content.Load<Song>("assets\\sounds\\ObvilonSoundtrack");
 
             MediaPlayer.Play(obvilonSoundtrack);
             MediaPlayer.IsRepeating = true;
@@ -231,6 +250,15 @@ namespace BrickGame
 
         protected override void Update(GameTime gameTime)
         {
+            if (_nextState != null)
+            {
+                _currentState = _nextState;
+                _nextState = null;
+            }
+
+            _currentState.Update(gameTime);
+            _currentState.PostUpdate(gameTime);
+
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
                 Exit();
@@ -263,7 +291,7 @@ namespace BrickGame
                 if (heroPos.X > 0)
                 {
                     heroPos.X -= 5;
-                    hero = Content.Load<Texture2D>("textures\\heroLeft");
+                    hero = Content.Load<Texture2D>("assets\\textures\\heroLeft");
                 }
             }
 
@@ -272,13 +300,13 @@ namespace BrickGame
                 if (heroPos.X <= (ResolutionTargetWidth - 70))
                 {
                     heroPos.X += 5;
-                    hero = Content.Load<Texture2D>("textures\\heroRight");
+                    hero = Content.Load<Texture2D>("assets\\textures\\heroRight");
                 }
             }
 
             if (klawisz.IsKeyUp(Keys.Left) && klawisz.IsKeyUp(Keys.Right) && (klawisz.IsKeyUp(Keys.A) && klawisz.IsKeyUp(Keys.D)))
             {
-                hero = Content.Load<Texture2D>(assetName: "textures\\heroStop");
+                hero = Content.Load<Texture2D>(assetName: "assets\\textures\\heroStop");
             }
 
             if (jump)
@@ -477,37 +505,37 @@ namespace BrickGame
             smallCloud1Pos.X += 1;
             if (smallCloud1Pos.X > ResolutionNativeWidth)
             {
-                smallCloud1Pos.X = -120;
+                smallCloud1Pos.X = -180;
             }
 
             smallCloud2Pos.X += 1;
             if (smallCloud2Pos.X > ResolutionNativeWidth)
             {
-                smallCloud2Pos.X = -120;
+                smallCloud2Pos.X = -180;
             }
 
             bigCloud1Pos.X += 1;
             if (bigCloud1Pos.X > ResolutionNativeWidth)
             {
-                bigCloud1Pos.X = -120;
+                bigCloud1Pos.X = -180;
             }
 
             bigCloud2Pos.X += 1;
             if (bigCloud2Pos.X > ResolutionNativeWidth)
             {
-                bigCloud2Pos.X = -120;
+                bigCloud2Pos.X = -180;
             }
 
             smallCloudMirrorPos.X += 1;
             if (smallCloudMirrorPos.X > ResolutionNativeWidth)
             {
-                smallCloudMirrorPos.X = -120;
+                smallCloudMirrorPos.X = -180;
             }
 
             bigCloud3Pos.X += 1;
             if (bigCloud3Pos.X > ResolutionNativeWidth)
             {
-                bigCloud3Pos.X = -120;
+                bigCloud3Pos.X = -180;
             }
             // End of "Cloud animation"
 
@@ -521,6 +549,8 @@ namespace BrickGame
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
             // TODO: Add your drawing code here
+
+            _currentState.Draw(gameTime, _spriteBatch);
 
             //_spriteBatch.Begin(transformMatrix: ResolutionScale);
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, ResolutionScale);
