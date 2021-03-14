@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using BrickGame.Draw;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
@@ -81,6 +82,8 @@ namespace BrickGame
         float startY = 0;
 
         // Creating object reference to get random speed and position value
+        Random random = new Random();
+
         DrawBrickSpeed drawBrickSpeed = new DrawBrickSpeed();
         DrawBrickPosition drawBrickPosition = new DrawBrickPosition();
 
@@ -310,7 +313,7 @@ namespace BrickGame
             if (brick1NewLoop == true)
             {
                 brick1Speed = drawBrickSpeed.Speed1();
-                brick1NewPos = drawBrickPosition.Position1();
+                brick1NewPos = drawBrickPosition.Position1(random);
                 brick1Pos.X = brick1NewPos;
                 brick1Pos.Y = -100;
                 brick1NewLoop = false;
@@ -328,7 +331,7 @@ namespace BrickGame
             if (brick2NewLoop == true)
             {
                 brick2Speed = drawBrickSpeed.Speed2();
-                brick2NewPos = drawBrickPosition.Position2();
+                brick2NewPos = drawBrickPosition.Position2(random);
                 brick2Pos.X = brick2NewPos;
                 brick2Pos.Y = -100;
                 brick2NewLoop = false;
@@ -346,7 +349,7 @@ namespace BrickGame
             if (brick3NewLoop == true)
             {
                 brick3Speed = drawBrickSpeed.Speed3();
-                brick3NewPos = drawBrickPosition.Position3();
+                brick3NewPos = drawBrickPosition.Position3(random);
                 brick3Pos.X = brick3NewPos;
                 brick3Pos.Y = -100;
                 brick3NewLoop = false;
@@ -365,7 +368,7 @@ namespace BrickGame
             if (coin1NewLoop == true)
             {
                 coin1Speed = drawCoinSpeed.Speed1();
-                coin1NewPos = drawCoinPosition.Position1();
+                coin1NewPos = drawCoinPosition.Position1(random);
                 coin1Pos.X = coin1NewPos;
                 coin1Pos.Y = -500;
                 coin1NewLoop = false;
