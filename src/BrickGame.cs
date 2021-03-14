@@ -168,6 +168,7 @@ namespace BrickGame
             ResolutionScale = Matrix.CreateScale(scaleX, scaleY, 1.0f);
 
             _graphics.IsFullScreen = true; // Enable / disable fullscreen
+            _graphics.HardwareModeSwitch = false; // Fix fullscreen flickering
             _graphics.ApplyChanges();
 
             // Background loading
