@@ -76,6 +76,9 @@ namespace BrickGame
         Vector2 orgin = new Vector2(0, 0);
         float angle = 0;
 
+        float angle1 = 0;
+        Vector2 orgin1 = new Vector2(0, 0);
+
         // Jump variables
         bool jump = false;
         float jumpTime = 0.0f;
@@ -252,7 +255,7 @@ namespace BrickGame
                 // ScoreManager
                 _scoreManager.Add(new Score()
                 {
-                    PlayerName = "Adison",
+                    PlayerName = "Adrian",
                     Value = score,
                 }
                 );
@@ -263,9 +266,9 @@ namespace BrickGame
                 // End of "ScoreManager"
             }
 
-            KeyboardState klawisz = Keyboard.GetState();
+            KeyboardState key = Keyboard.GetState();
 
-            if (klawisz.IsKeyDown(Keys.Left) || klawisz.IsKeyDown(Keys.A))
+            if (key.IsKeyDown(Keys.Left) || key.IsKeyDown(Keys.A))
             {
                 if (heroPos.X > 0)
                 {
@@ -274,7 +277,7 @@ namespace BrickGame
                 }
             }
 
-            if (klawisz.IsKeyDown(Keys.Right) || klawisz.IsKeyDown(Keys.D))
+            if (key.IsKeyDown(Keys.Right) || key.IsKeyDown(Keys.D))
             {
                 if (heroPos.X <= (ResolutionTargetWidth - 70))
                 {
@@ -283,7 +286,7 @@ namespace BrickGame
                 }
             }
 
-            if (klawisz.IsKeyUp(Keys.Left) && klawisz.IsKeyUp(Keys.Right) && (klawisz.IsKeyUp(Keys.A) && klawisz.IsKeyUp(Keys.D)))
+            if (key.IsKeyUp(Keys.Left) && key.IsKeyUp(Keys.Right) && (key.IsKeyUp(Keys.A) && key.IsKeyUp(Keys.D)))
             {
                 hero = Content.Load<Texture2D>(assetName: "textures\\heroStop");
             }
@@ -301,7 +304,7 @@ namespace BrickGame
 
             else
             {
-                if (klawisz.IsKeyDown(Keys.Up) || klawisz.IsKeyDown(Keys.Space) || klawisz.IsKeyDown(Keys.W))
+                if (key.IsKeyDown(Keys.Up) || key.IsKeyDown(Keys.Space) || key.IsKeyDown(Keys.W))
                 {
                     jump = true;
                     jumpTime = -10;
@@ -477,7 +480,7 @@ namespace BrickGame
             lifeAnim = new Rectangle(0, 32 * life, 160, 32);
 
             // Brick rotation
-            //angle += 0.01f;
+            angle += 0.01f;
             // End of "Brick rotation"
 
             // Cloud animation
@@ -550,7 +553,7 @@ namespace BrickGame
 
             if (showFPS == true)
             {
-                _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2((ResolutionNativeWidth - 85), 10), Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
+                _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2((ResolutionNativeWidth - 85), 10), Color.White, angle1, orgin1, 1.0f, SpriteEffects.None, 1);
             }
 
             // Used for debugging, e.g.: printing value
