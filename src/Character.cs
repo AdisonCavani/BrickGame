@@ -7,11 +7,13 @@ namespace BrickGame
 {
     class Character
     {
-        Texture2D texture;
-        Vector2 position;
+        public Texture2D texture;
+        public Vector2 position;
         public Vector2 velocity;
         public bool hasJumped;
         public Rectangle rectangle;
+
+
 
         public Character(Texture2D newTexture, Vector2 newPosition)
         {
@@ -46,19 +48,13 @@ namespace BrickGame
 
             if (Keyboard.GetState().IsKeyDown(Keys.Space) && hasJumped == false)
             {
-                position.Y -= 20f;
+                position.Y -= 30f;
                 velocity.Y = -5f;
                 hasJumped = true;
             }
 
             float i = 1;
             velocity.Y += 0.15f * i;
-
-        }
-
-        public void Draw(SpriteBatch _spriteBatch)
-        {
-            _spriteBatch.Draw(texture, rectangle, Color.White);
         }
     }
 }

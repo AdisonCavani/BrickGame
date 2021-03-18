@@ -121,6 +121,12 @@ namespace BrickGame
         public float scaleY;
         Matrix ResolutionScale;
 
+        // Hero animation
+        float elapsed;
+        float delay = 200f;
+        int frames = 0;
+        Rectangle animation;
+
         public BrickGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -252,9 +258,16 @@ namespace BrickGame
                 }
             }
 
+            if (player.position.Y > 1080)
+            {
+                life = 0;
+            }
+
             if (life <= 0)
             {
                 gameOverSoundFX.Play();
+                player.position.X = 50;
+                player.position.Y = 390;
 
                 // ScoreManager
                 _scoreManager.Add(new Score()
@@ -351,48 +364,48 @@ namespace BrickGame
             // Colision
 
             // Brick1
-            //if ((brick1Pos.Y + 44 > heroPos.Y) && (brick1Pos.X + 57 > heroPos.X) && (brick1Pos.X < heroPos.X + 48) && (heroPos.Y >= brick1Pos.Y))
-            //{
-            //    brick1NewLoop = true;
-            //    life -= 1;
-            //    if (life >= 1)
-            //    {
-            //        lostLifeSoundFX.Play();
-            //    }
-            //}
+            if ((brick1Pos.Y + 44 > player.position.Y) && (brick1Pos.X + 57 > player.position.X) && (brick1Pos.X < player.position.X + 48) && (player.position.Y >= brick1Pos.Y))
+            {
+                brick1NewLoop = true;
+                life -= 1;
+                if (life >= 1)
+                {
+                    lostLifeSoundFX.Play();
+                }
+            }
 
             // Brick 2
-            //if ((brick2Pos.Y + 44 > heroPos.Y) && (brick2Pos.X + 57 > heroPos.X) && (brick2Pos.X < heroPos.X + 48) && (heroPos.Y >= brick2Pos.Y))
-            //{
-            //    brick2NewLoop = true;
-            //    life -= 1;
-            //    if (life >= 1)
-            //    {
-            //        lostLifeSoundFX.Play();
-            //    }
-            //}
+            if ((brick2Pos.Y + 44 > player.position.Y) && (brick2Pos.X + 57 > player.position.X) && (brick2Pos.X < player.position.X + 48) && (player.position.Y >= brick2Pos.Y))
+            {
+                brick2NewLoop = true;
+                life -= 1;
+                if (life >= 1)
+                {
+                    lostLifeSoundFX.Play();
+                }
+            }
 
             // Brick3
-            //if ((brick3Pos.Y + 44 > heroPos.Y) && (brick3Pos.X + 57 > heroPos.X) && (brick3Pos.X < heroPos.X + 48) && (heroPos.Y >= brick3Pos.Y))
-            //{
-            //    brick3NewLoop = true;
-            //    life -= 1;
-            //    if (life >= 1)
-            //    {
-            //        lostLifeSoundFX.Play();
-            //    }
-            //}
+            if ((brick3Pos.Y + 44 > player.position.Y) && (brick3Pos.X + 57 > player.position.X) && (brick3Pos.X < player.position.X + 48) && (player.position.Y >= brick3Pos.Y))
+            {
+                brick3NewLoop = true;
+                life -= 1;
+                if (life >= 1)
+                {
+                    lostLifeSoundFX.Play();
+                }
+            }
 
             // Coin1
-            //if ((coin1Pos.Y + 47 > heroPos.Y) && (coin1Pos.X + 46 > heroPos.X) && (coin1Pos.X < heroPos.X + 46) && (heroPos.Y >= coin1Pos.Y))
-            //{
-            //    coin1NewLoop = true;
-            //    score += 10;
-            //    if (life >= 1)
-            //    {
-            //        coinSoundFX.Play();
-            //    }
-            //}
+            if ((coin1Pos.Y + 47 > player.position.Y) && (coin1Pos.X + 46 > player.position.X) && (coin1Pos.X < player.position.X + 46) && (player.position.Y >= coin1Pos.Y))
+            {
+                coin1NewLoop = true;
+                score += 10;
+                if (life >= 1)
+                {
+                    coinSoundFX.Play();
+                }
+            }
             // End of "Colision"
 
             // Coin animation
@@ -462,6 +475,23 @@ namespace BrickGame
 
             fps = 1f / gameTime.ElapsedGameTime.TotalSeconds;
 
+            elapsed += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (elapsed >= delay)
+            {
+                if (frames >= 2)
+                {
+                    frames = 0;
+                }
+                else
+                {
+                    {
+                        frames++;
+                    }
+                    elapsed = 0;
+                }
+            }
+            animation = new Rectangle(72 * frames, 0, 72, 105);
+
             base.Update(gameTime);
         }
 
@@ -485,12 +515,12 @@ namespace BrickGame
                 platform.Draw(_spriteBatch);
             }
 
-            player.Draw(_spriteBatch);
             _spriteBatch.Draw(brick1, brick1Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(brick2, brick2Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(brick3, brick3Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(coin1, coin1Pos, coinAnim, Color.White);
             _spriteBatch.Draw(health, healthPos, lifeAnim, Color.White);
+            _spriteBatch.Draw(player.texture, player.position, animation, Color.White);
             _spriteBatch.DrawString(font, "Score: " + score, new Vector2(20, 70), Color.Black);
             _spriteBatch.DrawString(font, "Highscores:\n" + string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + ": " + c.Value).ToArray()), new Vector2(20, 100), Color.Black);
 
@@ -515,8 +545,8 @@ static class RectangleHelper
     public static bool isOnTopOf(this Rectangle r1, Rectangle r2)
     {
         return (r1.Bottom >= r2.Top - penetrationMargin &&
-            r1.Bottom <= r2.Top + 1 &&
-            r1.Right >= r2.Left + 5 &&
-            r1.Left <= r2.Right - 5);
+            r1.Bottom <= r2.Top + 5 &&
+            r1.Right >= r2.Left + 170 &&
+            r1.Left <= r2.Right - 25);
     }
 }
