@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Linq;
 using BrickGame.Draw;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace BrickGame
 {
@@ -13,6 +14,10 @@ namespace BrickGame
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
+        Character player;
+
+        List<Platform> platforms = new List<Platform>();
 
         Texture2D background1;
         Texture2D background1Color;
@@ -31,11 +36,6 @@ namespace BrickGame
         Vector2 bigCloud2Pos;
         Texture2D bigCloud3;
         Vector2 bigCloud3Pos;
-
-        Texture2D hero;
-        Vector2 heroPos;
-        Texture2D heroLeft;
-        Texture2D heroRight;
 
         Texture2D brick1;
         Vector2 brick1Pos;
@@ -58,14 +58,8 @@ namespace BrickGame
         private ScoreManager _scoreManager;
 
         // Animations
-        Rectangle heroAnim;
         Rectangle coinAnim;
         Rectangle lifeAnim;
-
-        // Hero animation
-        float heroElapsed;
-        float heroDelay = 200f;
-        int heroFrames = 0;
 
         // Coin animation
         float coin1Elapsed;
@@ -78,11 +72,6 @@ namespace BrickGame
 
         float angle1 = 0;
         Vector2 orgin1 = new Vector2(0, 0);
-
-        // Jump variables
-        bool jump = false;
-        float jumpTime = 0.0f;
-        float startY = 0;
 
         // Creating object reference to get random speed and position value
         Random random = new Random();
@@ -155,6 +144,16 @@ namespace BrickGame
 
             // TODO: use this.Content to load your game content here
 
+            player = new Character(Content.Load<Texture2D>("textures\\heroStop"), new Vector2(50, 590));
+
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(30, 700)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(450, 580)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(900, 460)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(500, 340)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(75, 220)));
+
+
+
             // Game resolution
             ResolutionTargetWidth = GraphicsDevice.DisplayMode.Width;
             ResolutionTargetHeight = GraphicsDevice.DisplayMode.Height;
@@ -185,7 +184,6 @@ namespace BrickGame
             bigCloud3Pos.Y = 160;
 
             background1Color = Content.Load<Texture2D>("textures\\background1");
-            hero = Content.Load<Texture2D>("textures\\heroStop");
 
             smallCloud1 = Content.Load<Texture2D>("textures\\smallCloud");
             smallCloud1Pos.X = -100;
@@ -202,11 +200,6 @@ namespace BrickGame
             bigCloud2 = Content.Load<Texture2D>("textures\\bigCloud");
             bigCloud2Pos.X = -790;
             bigCloud2Pos.Y = 200;
-
-            // Hero starting position
-            heroPos.X = ResolutionNativeWidth / 2;
-            heroPos.Y = 717;
-            startY = heroPos.Y;
 
             // Brick loading
             brick1 = Content.Load<Texture2D>("textures\\brick1");
@@ -234,7 +227,7 @@ namespace BrickGame
             MediaPlayer.Play(obvilonSoundtrack);
             MediaPlayer.IsRepeating = true;
 
-            // HighScore manger
+            // ScoreManger
             _scoreManager = ScoreManager.Load();
 
         }
@@ -247,6 +240,17 @@ namespace BrickGame
             }
 
             // TODO: Add your update logic here
+
+            player.Update(gameTime, Content);
+
+            foreach (Platform platform in platforms)
+            {
+                if (player.rectangle.isOnTopOf(platform.rectangle))
+                {
+                    player.velocity.Y = 0f;
+                    player.hasJumped = false;                   
+                }
+            }
 
             if (life <= 0)
             {
@@ -266,50 +270,6 @@ namespace BrickGame
                 // End of "ScoreManager"
             }
 
-            KeyboardState key = Keyboard.GetState();
-
-            if (key.IsKeyDown(Keys.Left) || key.IsKeyDown(Keys.A))
-            {
-                if (heroPos.X > 0)
-                {
-                    heroPos.X -= 5;
-                    hero = Content.Load<Texture2D>("textures\\heroLeft");
-                }
-            }
-
-            if (key.IsKeyDown(Keys.Right) || key.IsKeyDown(Keys.D))
-            {
-                if (heroPos.X <= (ResolutionTargetWidth - 70))
-                {
-                    heroPos.X += 5;
-                    hero = Content.Load<Texture2D>("textures\\heroRight");
-                }
-            }
-
-            if (key.IsKeyUp(Keys.Left) && key.IsKeyUp(Keys.Right) && (key.IsKeyUp(Keys.A) && key.IsKeyUp(Keys.D)))
-            {
-                hero = Content.Load<Texture2D>(assetName: "textures\\heroStop");
-            }
-
-            if (jump)
-            {
-                heroPos.Y += jumpTime;
-                jumpTime += 1;
-                if (heroPos.Y >= startY)
-                {
-                    heroPos.Y = startY;
-                    jump = false;
-                }
-            }
-
-            else
-            {
-                if (key.IsKeyDown(Keys.Up) || key.IsKeyDown(Keys.Space) || key.IsKeyDown(Keys.W))
-                {
-                    jump = true;
-                    jumpTime = -10;
-                }
-            }
 
             // Falling objects movement
             // Brick1
@@ -391,70 +351,49 @@ namespace BrickGame
             // Colision
 
             // Brick1
-            if ((brick1Pos.Y + 44 > heroPos.Y) && (brick1Pos.X + 57 > heroPos.X) && (brick1Pos.X < heroPos.X + 48) && (heroPos.Y >= brick1Pos.Y))
-            {
-                brick1NewLoop = true;
-                life -= 1;
-                if (life >= 1)
-                {
-                    lostLifeSoundFX.Play();
-                }
-            }
+            //if ((brick1Pos.Y + 44 > heroPos.Y) && (brick1Pos.X + 57 > heroPos.X) && (brick1Pos.X < heroPos.X + 48) && (heroPos.Y >= brick1Pos.Y))
+            //{
+            //    brick1NewLoop = true;
+            //    life -= 1;
+            //    if (life >= 1)
+            //    {
+            //        lostLifeSoundFX.Play();
+            //    }
+            //}
 
             // Brick 2
-            if ((brick2Pos.Y + 44 > heroPos.Y) && (brick2Pos.X + 57 > heroPos.X) && (brick2Pos.X < heroPos.X + 48) && (heroPos.Y >= brick2Pos.Y))
-            {
-                brick2NewLoop = true;
-                life -= 1;
-                if (life >= 1)
-                {
-                    lostLifeSoundFX.Play();
-                }
-            }
+            //if ((brick2Pos.Y + 44 > heroPos.Y) && (brick2Pos.X + 57 > heroPos.X) && (brick2Pos.X < heroPos.X + 48) && (heroPos.Y >= brick2Pos.Y))
+            //{
+            //    brick2NewLoop = true;
+            //    life -= 1;
+            //    if (life >= 1)
+            //    {
+            //        lostLifeSoundFX.Play();
+            //    }
+            //}
 
             // Brick3
-            if ((brick3Pos.Y + 44 > heroPos.Y) && (brick3Pos.X + 57 > heroPos.X) && (brick3Pos.X < heroPos.X + 48) && (heroPos.Y >= brick3Pos.Y))
-            {
-                brick3NewLoop = true;
-                life -= 1;
-                if (life >= 1)
-                {
-                    lostLifeSoundFX.Play();
-                }
-            }
+            //if ((brick3Pos.Y + 44 > heroPos.Y) && (brick3Pos.X + 57 > heroPos.X) && (brick3Pos.X < heroPos.X + 48) && (heroPos.Y >= brick3Pos.Y))
+            //{
+            //    brick3NewLoop = true;
+            //    life -= 1;
+            //    if (life >= 1)
+            //    {
+            //        lostLifeSoundFX.Play();
+            //    }
+            //}
 
             // Coin1
-            if ((coin1Pos.Y + 47 > heroPos.Y) && (coin1Pos.X + 46 > heroPos.X) && (coin1Pos.X < heroPos.X + 46) && (heroPos.Y >= coin1Pos.Y))
-            {
-                coin1NewLoop = true;
-                score += 10;
-                if (life >= 1)
-                {
-                    coinSoundFX.Play();
-                }
-            }
+            //if ((coin1Pos.Y + 47 > heroPos.Y) && (coin1Pos.X + 46 > heroPos.X) && (coin1Pos.X < heroPos.X + 46) && (heroPos.Y >= coin1Pos.Y))
+            //{
+            //    coin1NewLoop = true;
+            //    score += 10;
+            //    if (life >= 1)
+            //    {
+            //        coinSoundFX.Play();
+            //    }
+            //}
             // End of "Colision"
-
-
-            // Hero animation
-            heroElapsed += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-            if (heroElapsed >= heroDelay)
-            {
-                if (heroFrames >= 2)
-                {
-                    heroFrames = 0;
-                }
-                else
-                {
-                    {
-                        heroFrames++;
-                    }
-                    heroElapsed = 0;
-                }
-            }
-            heroAnim = new Rectangle(72 * heroFrames, 0, 72, 105);
-            // End of "Hero animation"
-
 
             // Coin animation
             coin1Elapsed += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -480,7 +419,7 @@ namespace BrickGame
             lifeAnim = new Rectangle(0, 32 * life, 160, 32);
 
             // Brick rotation
-            angle += 0.01f;
+            //angle += 0.01f;
             // End of "Brick rotation"
 
             // Cloud animation
@@ -530,8 +469,6 @@ namespace BrickGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
-
             //_spriteBatch.Begin(transformMatrix: ResolutionScale);
             _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, ResolutionScale);
             _spriteBatch.Draw(background1, background1Pos, Color.White);
@@ -542,7 +479,13 @@ namespace BrickGame
             _spriteBatch.Draw(smallCloud2, smallCloud2Pos, Color.White);
             _spriteBatch.Draw(bigCloud1, bigCloud1Pos, Color.White);
             _spriteBatch.Draw(bigCloud2, bigCloud2Pos, Color.White);
-            _spriteBatch.Draw(hero, heroPos, heroAnim, Color.White);
+
+            foreach(Platform platform in platforms)
+            {
+                platform.Draw(_spriteBatch);
+            }
+
+            player.Draw(_spriteBatch);
             _spriteBatch.Draw(brick1, brick1Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(brick2, brick2Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(brick3, brick3Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
@@ -563,5 +506,17 @@ namespace BrickGame
 
             base.Draw(gameTime);
         }
+    }
+}
+
+static class RectangleHelper
+{
+    const int penetrationMargin = 5;
+    public static bool isOnTopOf(this Rectangle r1, Rectangle r2)
+    {
+        return (r1.Bottom >= r2.Top - penetrationMargin &&
+            r1.Bottom <= r2.Top + 1 &&
+            r1.Right >= r2.Left + 5 &&
+            r1.Left <= r2.Right - 5);
     }
 }
