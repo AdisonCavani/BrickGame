@@ -120,8 +120,6 @@ namespace BrickGame
         public float scaleY;
         Matrix ResolutionScale;
 
-        public Camera cam = new Camera(new Vector2 (0, 0));
-
         public BrickGame()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -243,8 +241,6 @@ namespace BrickGame
 
             // TODO: Add your update logic here
 
-            //cam.Update(new Vector2 ((player.texture.Width/3)/2, (player.texture.Height / 2)), gameTime);
-            //cam.Update(, gameTime);
             player.Update(gameTime, Content);
 
             foreach (Platform platform in platforms)
@@ -486,8 +482,7 @@ namespace BrickGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin();
-            //_spriteBatch.Begin(transformMatrix: cam.transform);
+            _spriteBatch.Begin(transformMatrix: ResolutionScale);
             _spriteBatch.Draw(background1, background1Pos, Color.White);
             _spriteBatch.Draw(smallCloudMirror, smallCloudMirrorPos, Color.White);
             _spriteBatch.Draw(bigCloud3, bigCloud3Pos, Color.White);
