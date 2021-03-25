@@ -19,6 +19,10 @@ namespace BrickGame
 
         List<Platform> platforms = new List<Platform>();
 
+        // Sounds
+        List<SoundEffect> soundEffects;
+        Song music;
+
         Texture2D background1;
         Texture2D background1Color;
         Vector2 background1Pos;
@@ -102,13 +106,8 @@ namespace BrickGame
         public int coin1NewPos;
         public bool coin1NewLoop = true;
 
-        // Sounds
-        SoundEffect coinSoundFX;
-        SoundEffect lostLifeSoundFX;
-        SoundEffect gameOverSoundFX;
-        Song obvilonSoundtrack;
-
-        double fps;
+        float fps;
+        float frametime;
         bool showFPS;
         SpriteFont notoSansBold;
 
@@ -121,26 +120,35 @@ namespace BrickGame
         public float scaleY;
         Matrix ResolutionScale;
 
+        public Camera cam = new Camera(new Vector2 (0, 0));
+
         public BrickGame()
         {
             _graphics = new GraphicsDeviceManager(this);
+            Content.RootDirectory = "Content\\assets";
+            soundEffects = new List<SoundEffect>();
+
             _graphics.SynchronizeWithVerticalRetrace = false; // Disable V-Sync
             IsFixedTimeStep = true; // Cap FPS to 60
             IsMouseVisible = true;
             showFPS = true; // Show FPS
+
+            Window.Title = "BrickGame";
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            
             base.Initialize();
         }
 
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            Content.RootDirectory = "Content\\assets";
+
+            //_graphics.PreferMultiSampling = true;
+            //GraphicsDevice.PresentationParameters.MultiSampleCount = 8;
 
             // TODO: use this.Content to load your game content here
 
@@ -151,6 +159,15 @@ namespace BrickGame
             platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(900, 460)));
             platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(500, 340)));
             platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(75, 220)));
+
+            // Sounds
+            soundEffects.Add(Content.Load<SoundEffect>("sounds\\CoinSoundFX"));
+            soundEffects.Add(Content.Load<SoundEffect>("sounds\\GameOverSoundFX"));
+            soundEffects.Add(Content.Load<SoundEffect>("sounds\\LostLifeSoundFX"));
+
+            music = Content.Load<Song>("sounds\\LegoMusic");
+            MediaPlayer.Play(music);
+            MediaPlayer.IsRepeating = true;
 
             // Game resolution
             ResolutionTargetWidth = GraphicsDevice.DisplayMode.Width;
@@ -212,15 +229,6 @@ namespace BrickGame
             healthPos.X = 20;
             healthPos.Y = 20;
 
-            // Sound
-            coinSoundFX = Content.Load<SoundEffect>("sounds\\CoinSoundFX");
-            lostLifeSoundFX = Content.Load<SoundEffect>("sounds\\LostLifeSoundFX");
-            gameOverSoundFX = Content.Load<SoundEffect>("sounds\\GameOverSoundFX");
-            obvilonSoundtrack = Content.Load<Song>("sounds\\ObvilonSoundtrack");
-
-            MediaPlayer.Play(obvilonSoundtrack);
-            MediaPlayer.IsRepeating = true;
-
             // ScoreManger
             _scoreManager = ScoreManager.Load();
 
@@ -235,6 +243,7 @@ namespace BrickGame
 
             // TODO: Add your update logic here
 
+            cam.Update(new Vector2 ((player.texture.Width/3)/2, (player.texture.Height / 2)), gameTime);
             player.Update(gameTime, Content);
 
             foreach (Platform platform in platforms)
@@ -252,16 +261,16 @@ namespace BrickGame
                 }
             }
 
-            if (player.position.Y > 1080)
+            if (player.position.Y > 1080 + player.texture.Height)
             {
                 life = 0;
             }
 
             if (life <= 0)
             {
-                gameOverSoundFX.Play();
+                soundEffects[1].CreateInstance().Play();
                 player.position.X = 50;
-                player.position.Y = 390;
+                player.position.Y = 580;
 
                 // ScoreManager
                 _scoreManager.Add(new Score()
@@ -364,7 +373,7 @@ namespace BrickGame
                 life -= 1;
                 if (life >= 1)
                 {
-                    lostLifeSoundFX.Play();
+                    soundEffects[2].CreateInstance().Play();
                 }
             }
 
@@ -375,7 +384,7 @@ namespace BrickGame
                 life -= 1;
                 if (life >= 1)
                 {
-                    lostLifeSoundFX.Play();
+                    soundEffects[2].CreateInstance().Play();
                 }
             }
 
@@ -386,7 +395,7 @@ namespace BrickGame
                 life -= 1;
                 if (life >= 1)
                 {
-                    lostLifeSoundFX.Play();
+                    soundEffects[2].CreateInstance().Play();
                 }
             }
 
@@ -397,7 +406,7 @@ namespace BrickGame
                 score += 10;
                 if (life >= 1)
                 {
-                    coinSoundFX.Play();
+                    soundEffects[0].CreateInstance().Play();
                 }
             }
             // End of "Colision"
@@ -466,7 +475,8 @@ namespace BrickGame
             }
             // End of "Cloud animation"
 
-            fps = 1f / gameTime.ElapsedGameTime.TotalSeconds;
+            frametime = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            fps = (float)(1 / gameTime.ElapsedGameTime.TotalSeconds);
 
             base.Update(gameTime);
         }
@@ -475,8 +485,8 @@ namespace BrickGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            //_spriteBatch.Begin(transformMatrix: ResolutionScale);
-            _spriteBatch.Begin(SpriteSortMode.Deferred, null, null, null, null, null, ResolutionScale);
+            _spriteBatch.Begin(transformMatrix: ResolutionScale);
+            //_spriteBatch.Begin(transformMatrix: cam.transform);
             _spriteBatch.Draw(background1, background1Pos, Color.White);
             _spriteBatch.Draw(smallCloudMirror, smallCloudMirrorPos, Color.White);
             _spriteBatch.Draw(bigCloud3, bigCloud3Pos, Color.White);
@@ -503,6 +513,7 @@ namespace BrickGame
             if (showFPS == true)
             {
                 _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2((ResolutionNativeWidth - 85), 10), Color.White, angle1, orgin1, 1.0f, SpriteEffects.None, 1);
+                _spriteBatch.DrawString(notoSansBold,frametime.ToString("0.0") + " ms", new Vector2((ResolutionNativeWidth - 85), 30), Color.White, angle1, orgin1, 1.0f, SpriteEffects.None, 1);
             }
 
             // Used for debugging, e.g.: printing value
