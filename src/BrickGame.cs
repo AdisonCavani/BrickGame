@@ -243,7 +243,8 @@ namespace BrickGame
 
             // TODO: Add your update logic here
 
-            cam.Update(new Vector2 ((player.texture.Width/3)/2, (player.texture.Height / 2)), gameTime);
+            //cam.Update(new Vector2 ((player.texture.Width/3)/2, (player.texture.Height / 2)), gameTime);
+            //cam.Update(, gameTime);
             player.Update(gameTime, Content);
 
             foreach (Platform platform in platforms)
@@ -485,7 +486,7 @@ namespace BrickGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin(transformMatrix: ResolutionScale);
+            _spriteBatch.Begin();
             //_spriteBatch.Begin(transformMatrix: cam.transform);
             _spriteBatch.Draw(background1, background1Pos, Color.White);
             _spriteBatch.Draw(smallCloudMirror, smallCloudMirrorPos, Color.White);
