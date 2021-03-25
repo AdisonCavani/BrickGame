@@ -113,19 +113,13 @@ namespace BrickGame
         SpriteFont notoSansBold;
 
         // Resolution
+        public const int ResolutionNativeWidth = 1920; // Native resolution
+        public const int ResolutionNativeHeight = 1080; // Native resolution
         public float ResolutionTargetWidth;
         public float ResolutionTargetHeight;
-        public float ResolutionNativeWidth;
-        public float ResolutionNativeHeight;
         public float scaleX;
         public float scaleY;
         Matrix ResolutionScale;
-
-        // Hero animation
-        float elapsed;
-        float delay = 200f;
-        int frames = 0;
-        Rectangle animation;
 
         public BrickGame()
         {
@@ -158,18 +152,12 @@ namespace BrickGame
             platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(500, 340)));
             platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(75, 220)));
 
-
-
             // Game resolution
             ResolutionTargetWidth = GraphicsDevice.DisplayMode.Width;
             ResolutionTargetHeight = GraphicsDevice.DisplayMode.Height;
 
             _graphics.PreferredBackBufferWidth = GraphicsDevice.DisplayMode.Width; // Target resolution
             _graphics.PreferredBackBufferHeight = GraphicsDevice.DisplayMode.Height; // Target resolution
-
-            //GraphicsDevice.DisplayMode.Width
-            ResolutionNativeWidth = 1920; // Autodetection of current resolution
-            ResolutionNativeHeight = 1080; // Autodetection of current resolution
 
             scaleX = (float)_graphics.PreferredBackBufferWidth / ResolutionNativeWidth;
             scaleY = (float)_graphics.PreferredBackBufferHeight / ResolutionNativeHeight;
@@ -255,6 +243,12 @@ namespace BrickGame
                 {
                     player.velocity.Y = 0f;
                     player.hasJumped = false;                   
+                }
+                if (Keyboard.GetState().IsKeyDown(Keys.Space) && player.hasJumped == false && player.rectangle.isOnTopOf(platform.rectangle))
+                {
+                    player.position.Y -= 17f;
+                    player.velocity.Y = -6f;
+                    player.hasJumped = true;
                 }
             }
 
@@ -427,7 +421,6 @@ namespace BrickGame
             coinAnim = new Rectangle(46 * coin1Frames, 0, 46, 47);
             // End of "Coin animation"
 
-
             // Health animation
             lifeAnim = new Rectangle(0, 32 * life, 160, 32);
 
@@ -475,23 +468,6 @@ namespace BrickGame
 
             fps = 1f / gameTime.ElapsedGameTime.TotalSeconds;
 
-            elapsed += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-            if (elapsed >= delay)
-            {
-                if (frames >= 2)
-                {
-                    frames = 0;
-                }
-                else
-                {
-                    {
-                        frames++;
-                    }
-                    elapsed = 0;
-                }
-            }
-            animation = new Rectangle(72 * frames, 0, 72, 105);
-
             base.Update(gameTime);
         }
 
@@ -520,7 +496,7 @@ namespace BrickGame
             _spriteBatch.Draw(brick3, brick3Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
             _spriteBatch.Draw(coin1, coin1Pos, coinAnim, Color.White);
             _spriteBatch.Draw(health, healthPos, lifeAnim, Color.White);
-            _spriteBatch.Draw(player.texture, player.position, animation, Color.White);
+            _spriteBatch.Draw(player.texture, player.position, player.animation, Color.White);
             _spriteBatch.DrawString(font, "Score: " + score, new Vector2(20, 70), Color.Black);
             _spriteBatch.DrawString(font, "Highscores:\n" + string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + ": " + c.Value).ToArray()), new Vector2(20, 100), Color.Black);
 
@@ -546,7 +522,7 @@ static class RectangleHelper
     {
         return (r1.Bottom >= r2.Top - penetrationMargin &&
             r1.Bottom <= r2.Top + 5 &&
-            r1.Right >= r2.Left + 170 &&
-            r1.Left <= r2.Right - 25);
+            r1.Right >= r2.Left + 25 && // Left
+            r1.Left <= r2.Right - 20); // Right
     }
 }

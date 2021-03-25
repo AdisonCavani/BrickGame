@@ -13,7 +13,11 @@ namespace BrickGame
         public bool hasJumped;
         public Rectangle rectangle;
 
-
+        // Hero animation
+        float elapsed;
+        float delay = 200f;
+        int frames = 0;
+        public Rectangle animation;
 
         public Character(Texture2D newTexture, Vector2 newPosition)
         {
@@ -25,7 +29,7 @@ namespace BrickGame
         public void Update(GameTime gameTime, ContentManager Content)
         {
             position += velocity;
-            rectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
+            rectangle = new Rectangle((int)position.X, (int)position.Y, (texture.Width / 3), texture.Height);
 
 
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
@@ -46,15 +50,25 @@ namespace BrickGame
                 texture = Content.Load<Texture2D>("textures\\heroStop");
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Space) && hasJumped == false)
-            {
-                position.Y -= 30f;
-                velocity.Y = -5f;
-                hasJumped = true;
-            }
-
             float i = 1;
             velocity.Y += 0.15f * i;
+
+            elapsed += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+            if (elapsed >= delay)
+            {
+                if (frames >= 2)
+                {
+                    frames = 0;
+                }
+                else
+                {
+                    {
+                        frames++;
+                    }
+                    elapsed = 0;
+                }
+            }
+            animation = new Rectangle(72 * frames, 0, 72, 105);
         }
     }
 }
