@@ -183,7 +183,7 @@
 /processorParam:TextureFormat=Color
 /build:assets/textures/heroStop.png
 
-#begin assets/textures/Platform.jpg
+#begin assets/textures/platforms/Platform1.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -193,9 +193,9 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/textures/Platform.jpg
+/build:assets/textures/platforms/Platform1.png
 
-#begin assets/textures/platforms/Platforma.png
+#begin assets/textures/platforms/Platform2.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -205,7 +205,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:assets/textures/platforms/Platforma.png
+/build:assets/textures/platforms/Platform2.png
 
 #begin assets/textures/smallCloud.png
 /importer:TextureImporter

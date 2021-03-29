@@ -152,11 +152,12 @@ namespace BrickGame
 
             player = new Character(Content.Load<Texture2D>("textures\\heroStop"), new Vector2(50, 590));
 
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(30, 700)));
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(450, 580)));
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(900, 460)));
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(500, 340)));
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\Platform"), new Vector2(75, 220)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2"), new Vector2(30, 700)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2"), new Vector2(450, 580)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2"), new Vector2(900, 460)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2"), new Vector2(500, 340)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2"), new Vector2(75, 220)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2"), new Vector2(1000, 220)));
 
             // Sounds
             soundEffects.Add(Content.Load<SoundEffect>("sounds\\CoinSoundFX"));
