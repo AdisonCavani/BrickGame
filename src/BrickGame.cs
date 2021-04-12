@@ -15,7 +15,12 @@ namespace BrickGame
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
 
+        // Game states
+        int gameState;
+        int previousGameState;
+
         Character player;
+        FinishFlag finishFlag;
 
         List<Platform> platforms = new List<Platform>();
 
@@ -23,9 +28,16 @@ namespace BrickGame
         List<SoundEffect> soundEffects;
         Song music;
 
+        Texture2D splashScreen;
+        Texture2D winnerScreen;
+        Texture2D loserScreen;
+
+        SpriteFont stratum2bold45;
+        SpriteFont stratum2bold95;
+
         Texture2D background1;
-        Texture2D background1Color;
         Vector2 background1Pos;
+        Texture2D background1Color;
         Vector2 background1ColorPos;
 
         Texture2D smallCloud1;
@@ -62,7 +74,8 @@ namespace BrickGame
 
         // Score variables
         SpriteFont font;
-        private int score;
+        int score;
+        int lastScore;
         private ScoreManager _scoreManager;
 
         // Animations
@@ -141,7 +154,7 @@ namespace BrickGame
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            
+
             base.Initialize();
         }
 
@@ -154,7 +167,16 @@ namespace BrickGame
 
             // TODO: use this.Content to load your game content here
 
+            splashScreen = Content.Load<Texture2D>("screens\\splash");
+            winnerScreen = Content.Load<Texture2D>("screens\\winner");
+            loserScreen = Content.Load<Texture2D>("screens\\gameOver");
+
+            stratum2bold45 = Content.Load<SpriteFont>("fonts\\Stratum2Bold45");
+            stratum2bold95 = Content.Load<SpriteFont>("fonts\\Stratum2Bold95");
+
             player = new Character(Content.Load<Texture2D>("textures\\heroStop"), new Vector2(50, 590));
+
+            finishFlag = new FinishFlag(Content.Load<Texture2D>("textures\\finishFlag"), new Vector2(115, 130));
 
             platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(30, 700)));
             platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(400, 580)));
@@ -243,235 +265,277 @@ namespace BrickGame
                 Exit();
             }
 
+
+            if (gameState == 0 && Keyboard.GetState().IsKeyDown(Keys.Enter))
+            {
+                previousGameState = 0;
+                gameState = 1;
+            }
+
+            if (gameState == 2 && Keyboard.GetState().IsKeyDown(Keys.Enter))
+            {
+                previousGameState = 2;
+                gameState = 1;
+            }
+
+            if (gameState == 3 && Keyboard.GetState().IsKeyDown(Keys.Enter))
+            {
+                previousGameState = 3;
+                gameState = 1;
+            }
+
+            if (previousGameState == 2 || previousGameState == 3) // Reset positions on game restart
+            {
+                brick1NewLoop = true;
+                brick2NewLoop = true;
+                brick3NewLoop = true;
+
+                coin1NewLoop = true;
+
+                smallCloud1Pos.X = -100;
+                smallCloud2Pos.X = -625;
+
+                bigCloud1Pos.X = -300;
+                bigCloud2Pos.X = -790;
+                bigCloud3Pos.X = -575;
+
+                smallCloudMirrorPos.X = -880;
+
+                previousGameState = 0;
+            }
             // TODO: Add your update logic here
 
-            player.Update(gameTime, Content);
-
-            foreach (Platform platform in platforms)
+            if (gameState == 1)
             {
-                if (player.rectangle.isOnTopOf(platform.rectangle))
+                player.Update(gameTime, Content);
+                finishFlag.Update(gameTime);
+
+                if (finishFlag.rectangle.Intersects(player.rectangle))
                 {
-                    player.velocity.Y = 0f;
-                    player.hasJumped = false;                   
+                    gameState = 2;
                 }
-                if (Keyboard.GetState().IsKeyDown(Keys.Space) && player.hasJumped == false && player.rectangle.isOnTopOf(platform.rectangle))
+
+                foreach (Platform platform in platforms)
                 {
-                    player.position.Y -= 17f;
-                    player.velocity.Y = -6f;
-                    player.hasJumped = true;
-                }
-            }
-
-            if (player.position.Y > 1080 + player.texture.Height)
-            {
-                life = 0;
-            }
-
-            if (life <= 0)
-            {
-                soundEffects[1].CreateInstance().Play();
-                player.position.X = 50;
-                player.position.Y = 580;
-
-                // ScoreManager
-                _scoreManager.Add(new Score()
-                {
-                    PlayerName = "Adrian",
-                    Value = score,
-                }
-                );
-
-                ScoreManager.Save(_scoreManager);
-                score = 0;
-                life = 5;
-                // End of "ScoreManager"
-            }
-
-
-            // Falling objects movement
-            // Brick1
-            brick1Rect = new Rectangle((int)brick1Pos.X, (int)brick1Pos.Y, brick1.Width, brick1.Height);
-
-            if (brick1NewLoop == true)
-            {
-                brick1Speed = drawBrickSpeed.Speed1();
-                brick1NewPos = drawBrickPosition.Position1(random);
-                brick1Pos.X = brick1NewPos;
-                brick1Pos.Y = -100;
-                brick1NewLoop = false;
-            }
-
-            brick1Pos.Y += brick1Speed;
-
-            if (brick1Pos.Y > ResolutionNativeHeight)
-            {
-                score++;
-                brick1NewLoop = true;
-            }
-
-            if (brick1Rect.Intersects(player.rectangle))
-            {
-                life -= 1;
-                brick1NewLoop = true;
-                if (life >= 1)
-                {
-                    soundEffects[2].CreateInstance().Play();
-                }
-            }
-
-            // Brick2
-            brick2Rect = new Rectangle((int)brick2Pos.X, (int)brick2Pos.Y, brick2.Width, brick2.Height);
-
-            if (brick2NewLoop == true)
-            {
-                brick2Speed = drawBrickSpeed.Speed2();
-                brick2NewPos = drawBrickPosition.Position2(random);
-                brick2Pos.X = brick2NewPos;
-                brick2Pos.Y = -100;
-                brick2NewLoop = false;
-            }
-
-            brick2Pos.Y += brick2Speed;
-
-            if (brick2Pos.Y > ResolutionNativeHeight)
-            {
-                score++;
-                brick2NewLoop = true;
-            }
-
-            if (brick2Rect.Intersects(player.rectangle))
-            {
-                life -= 1;
-                brick2NewLoop = true;
-                if (life >= 1)
-                {
-                    soundEffects[2].CreateInstance().Play();
-                }
-            }
-
-            // Brick3
-            brick3Rect = new Rectangle((int)brick3Pos.X, (int)brick3Pos.Y, brick3.Width, brick3.Height);
-
-            if (brick3NewLoop == true)
-            {
-                brick3Speed = drawBrickSpeed.Speed3();
-                brick3NewPos = drawBrickPosition.Position3(random);
-                brick3Pos.X = brick3NewPos;
-                brick3Pos.Y = -100;
-                brick3NewLoop = false;
-            }
-
-            brick3Pos.Y += brick3Speed;
-
-            if (brick3Pos.Y > ResolutionNativeHeight)
-            {
-                score++;
-                brick3NewLoop = true;
-            }
-
-            if (brick3Rect.Intersects(player.rectangle))
-            {
-                life -= 1;
-                brick3NewLoop = true;
-                if (life >= 1)
-                {
-                    soundEffects[2].CreateInstance().Play();
-                }
-            }
-
-            // Coin1
-            coin1Rect = new Rectangle((int)coin1Pos.X, (int)coin1Pos.Y, coin1.Width / 10, coin1.Height);
-
-            if (coin1NewLoop == true)
-            {
-                coin1Speed = drawCoinSpeed.Speed1();
-                coin1NewPos = drawCoinPosition.Position1(random);
-                coin1Pos.X = coin1NewPos;
-                coin1Pos.Y = -500;
-                coin1NewLoop = false;
-            }
-
-            coin1Pos.Y += coin1Speed;
-
-            if (coin1Pos.Y > ResolutionNativeHeight)
-            {
-                coin1NewLoop = true;
-            }
-
-            if (coin1Rect.Intersects(player.rectangle))
-            {
-                score += 10;
-                coin1NewLoop = true;
-                if (life >= 1)
-                {
-                    soundEffects[0].CreateInstance().Play();
-                }
-            }
-            // End of "Colision"
-
-            // Coin animation
-            coin1Elapsed += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
-            if (coin1Elapsed >= coin1Delay)
-            {
-                if (coin1Frames >= 9)
-                {
-                    coin1Frames = 0;
-                }
-                else
-                {
+                    if (player.rectangle.isOnTopOf(platform.rectangle))
                     {
-                        coin1Frames++;
+                        player.velocity.Y = 0f;
+                        player.hasJumped = false;
                     }
-                    coin1Elapsed = 0;
+                    if (Keyboard.GetState().IsKeyDown(Keys.Space) && player.hasJumped == false && player.rectangle.isOnTopOf(platform.rectangle))
+                    {
+                        player.position.Y -= 17f;
+                        player.velocity.Y = -6f;
+                        player.hasJumped = true;
+                    }
                 }
+
+                if (player.position.Y > 1080 + player.texture.Height)
+                {
+                    life = 0;
+                }
+
+                if (life <= 0)
+                {
+                    soundEffects[1].CreateInstance().Play();
+                    player.position.X = 50;
+                    player.position.Y = 580;
+
+                    // ScoreManager
+                    _scoreManager.Add(new Score()
+                    {
+                        PlayerName = "Adrian",
+                        Value = score,
+                    }
+                    );
+
+                    ScoreManager.Save(_scoreManager);
+                    lastScore = score;
+                    score = 0;
+                    life = 5;
+                    // End of "ScoreManager"
+
+                    gameState = 3;
+                }
+
+
+                // Falling objects movement
+                // Brick1
+                if (brick1NewLoop == true)
+                {
+                    brick1Speed = drawBrickSpeed.Speed1();
+                    brick1Pos.X = drawBrickPosition.Position1(random);
+                    brick1Pos.Y = -100;
+                    brick1NewLoop = false;
+                }
+
+                brick1Rect = new Rectangle((int)brick1Pos.X, (int)brick1Pos.Y, brick1.Width, brick1.Height);
+                brick1Pos.Y += brick1Speed;
+
+                if (brick1Pos.Y > ResolutionNativeHeight)
+                {
+                    score++;
+                    brick1NewLoop = true;
+                }
+
+                if (brick1Rect.Intersects(player.rectangle))
+                {
+                    life -= 1;
+                    brick1NewLoop = true;
+                    if (life >= 1)
+                    {
+                        soundEffects[2].CreateInstance().Play();
+                    }
+                }
+
+                // Brick2
+                if (brick2NewLoop == true)
+                {
+                    brick2Speed = drawBrickSpeed.Speed2();
+                    brick2Pos.X = drawBrickPosition.Position2(random);
+                    brick2Pos.Y = -100;
+                    brick2NewLoop = false;
+                }
+
+                brick2Rect = new Rectangle((int)brick2Pos.X, (int)brick2Pos.Y, brick2.Width, brick2.Height);
+                brick2Pos.Y += brick2Speed;
+
+                if (brick2Pos.Y > ResolutionNativeHeight)
+                {
+                    score++;
+                    brick2NewLoop = true;
+                }
+
+                if (brick2Rect.Intersects(player.rectangle))
+                {
+                    life -= 1;
+                    brick2NewLoop = true;
+                    if (life >= 1)
+                    {
+                        soundEffects[2].CreateInstance().Play();
+                    }
+                }
+
+                // Brick3
+                if (brick3NewLoop == true)
+                {
+                    brick3Speed = drawBrickSpeed.Speed3();
+                    brick3Pos.X = drawBrickPosition.Position3(random);
+                    brick3Pos.Y = -100;
+                    brick3NewLoop = false;
+                }
+
+                brick3Rect = new Rectangle((int)brick3Pos.X, (int)brick3Pos.Y, brick3.Width, brick3.Height);
+                brick3Pos.Y += brick3Speed;
+
+                if (brick3Pos.Y > ResolutionNativeHeight)
+                {
+                    score++;
+                    brick3NewLoop = true;
+                }
+
+                if (brick3Rect.Intersects(player.rectangle))
+                {
+                    life -= 1;
+                    brick3NewLoop = true;
+                    if (life >= 1)
+                    {
+                        soundEffects[2].CreateInstance().Play();
+                    }
+                }
+
+                // Coin1
+                if (coin1NewLoop == true)
+                {
+                    coin1Speed = drawCoinSpeed.Speed1();
+                    coin1Pos.X = drawCoinPosition.Position1(random);
+                    coin1Pos.Y = -500;
+                    coin1NewLoop = false;
+                }
+
+                coin1Rect = new Rectangle((int)coin1Pos.X, (int)coin1Pos.Y, coin1.Width / 10, coin1.Height);
+                coin1Pos.Y += coin1Speed;
+
+                if (coin1Pos.Y > ResolutionNativeHeight)
+                {
+                    coin1NewLoop = true;
+                }
+
+                if (coin1Rect.Intersects(player.rectangle))
+                {
+                    score += 10;
+                    coin1NewLoop = true;
+                    if (life >= 1)
+                    {
+                        soundEffects[0].CreateInstance().Play();
+                    }
+                }
+                // End of "Colision"
+
+                // Coin animation
+                coin1Elapsed += (float)gameTime.ElapsedGameTime.TotalMilliseconds;
+                if (coin1Elapsed >= coin1Delay)
+                {
+                    if (coin1Frames >= 9)
+                    {
+                        coin1Frames = 0;
+                    }
+                    else
+                    {
+                        {
+                            coin1Frames++;
+                        }
+                        coin1Elapsed = 0;
+                    }
+                }
+                coinAnim = new Rectangle(46 * coin1Frames, 0, 46, 47);
+                // End of "Coin animation"
+
+                // Health animation
+                lifeAnim = new Rectangle(0, 32 * life, 160, 32);
+
+                // Brick rotation
+                //angle += 0.01f;
+                // End of "Brick rotation"
+
+                // Cloud animation
+                smallCloud1Pos.X += 1;
+                if (smallCloud1Pos.X > ResolutionNativeWidth)
+                {
+                    smallCloud1Pos.X = -180;
+                }
+
+                smallCloud2Pos.X += 1;
+                if (smallCloud2Pos.X > ResolutionNativeWidth)
+                {
+                    smallCloud2Pos.X = -180;
+                }
+
+                bigCloud1Pos.X += 1;
+                if (bigCloud1Pos.X > ResolutionNativeWidth)
+                {
+                    bigCloud1Pos.X = -180;
+                }
+
+                bigCloud2Pos.X += 1;
+                if (bigCloud2Pos.X > ResolutionNativeWidth)
+                {
+                    bigCloud2Pos.X = -180;
+                }
+
+                smallCloudMirrorPos.X += 1;
+                if (smallCloudMirrorPos.X > ResolutionNativeWidth)
+                {
+                    smallCloudMirrorPos.X = -180;
+                }
+
+                bigCloud3Pos.X += 1;
+                if (bigCloud3Pos.X > ResolutionNativeWidth)
+                {
+                    bigCloud3Pos.X = -180;
+                }
+                // End of "Cloud animation"
             }
-            coinAnim = new Rectangle(46 * coin1Frames, 0, 46, 47);
-            // End of "Coin animation"
-
-            // Health animation
-            lifeAnim = new Rectangle(0, 32 * life, 160, 32);
-
-            // Brick rotation
-            //angle += 0.01f;
-            // End of "Brick rotation"
-
-            // Cloud animation
-            smallCloud1Pos.X += 1;
-            if (smallCloud1Pos.X > ResolutionNativeWidth)
-            {
-                smallCloud1Pos.X = -180;
-            }
-
-            smallCloud2Pos.X += 1;
-            if (smallCloud2Pos.X > ResolutionNativeWidth)
-            {
-                smallCloud2Pos.X = -180;
-            }
-
-            bigCloud1Pos.X += 1;
-            if (bigCloud1Pos.X > ResolutionNativeWidth)
-            {
-                bigCloud1Pos.X = -180;
-            }
-
-            bigCloud2Pos.X += 1;
-            if (bigCloud2Pos.X > ResolutionNativeWidth)
-            {
-                bigCloud2Pos.X = -180;
-            }
-
-            smallCloudMirrorPos.X += 1;
-            if (smallCloudMirrorPos.X > ResolutionNativeWidth)
-            {
-                smallCloudMirrorPos.X = -180;
-            }
-
-            bigCloud3Pos.X += 1;
-            if (bigCloud3Pos.X > ResolutionNativeWidth)
-            {
-                bigCloud3Pos.X = -180;
-            }
-            // End of "Cloud animation"
 
             frametime = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
             fps = (float)(1 / gameTime.ElapsedGameTime.TotalSeconds);
@@ -483,40 +547,71 @@ namespace BrickGame
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            _spriteBatch.Begin(transformMatrix: ResolutionScale);
-            _spriteBatch.Draw(background1, background1Pos, Color.White);
-            _spriteBatch.Draw(smallCloudMirror, smallCloudMirrorPos, Color.White);
-            _spriteBatch.Draw(bigCloud3, bigCloud3Pos, Color.White);
-            _spriteBatch.Draw(background1Color, background1ColorPos, Color.White);
-            _spriteBatch.Draw(smallCloud1, smallCloud1Pos, Color.White);
-            _spriteBatch.Draw(smallCloud2, smallCloud2Pos, Color.White);
-            _spriteBatch.Draw(bigCloud1, bigCloud1Pos, Color.White);
-            _spriteBatch.Draw(bigCloud2, bigCloud2Pos, Color.White);
-
-            foreach(Platform platform in platforms)
+            if (gameState == 0)
             {
-                platform.Draw(_spriteBatch);
+                _spriteBatch.Begin(transformMatrix: ResolutionScale);
+                _spriteBatch.Draw(splashScreen, new Vector2(0, 0), null, Color.White);
+                _spriteBatch.DrawString(stratum2bold45, string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + " - " + c.Value).ToArray()), new Vector2(885, 590), Color.White);
+                _spriteBatch.End();
             }
 
-            _spriteBatch.Draw(brick1, brick1Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
-            _spriteBatch.Draw(brick2, brick2Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
-            _spriteBatch.Draw(brick3, brick3Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
-            _spriteBatch.Draw(coin1, coin1Pos, coinAnim, Color.White);
-            _spriteBatch.Draw(health, healthPos, lifeAnim, Color.White);
-            _spriteBatch.Draw(player.texture, player.position, player.animation, Color.White);
-            _spriteBatch.DrawString(font, "Score: " + score, new Vector2(20, 70), Color.Black);
-            _spriteBatch.DrawString(font, "Highscores:\n" + string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + ": " + c.Value).ToArray()), new Vector2(20, 100), Color.Black);
-
-            if (showFPS == true)
+            if (gameState == 1)
             {
-                _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2((ResolutionNativeWidth - 85), 10), Color.White, angle1, orgin1, 1.0f, SpriteEffects.None, 1);
-                _spriteBatch.DrawString(notoSansBold,frametime.ToString("0.0") + " ms", new Vector2((ResolutionNativeWidth - 85), 30), Color.White, angle1, orgin1, 1.0f, SpriteEffects.None, 1);
+                _spriteBatch.Begin(transformMatrix: ResolutionScale);
+                _spriteBatch.Draw(background1, background1Pos, Color.White);
+                _spriteBatch.Draw(smallCloudMirror, smallCloudMirrorPos, Color.White);
+                _spriteBatch.Draw(bigCloud3, bigCloud3Pos, Color.White);
+                _spriteBatch.Draw(background1Color, background1ColorPos, Color.White);
+                _spriteBatch.Draw(smallCloud1, smallCloud1Pos, Color.White);
+                _spriteBatch.Draw(smallCloud2, smallCloud2Pos, Color.White);
+                _spriteBatch.Draw(bigCloud1, bigCloud1Pos, Color.White);
+                _spriteBatch.Draw(bigCloud2, bigCloud2Pos, Color.White);
+
+                foreach (Platform platform in platforms)
+                {
+                    platform.Draw(_spriteBatch);
+                }
+
+                _spriteBatch.Draw(finishFlag.texture, finishFlag.position, finishFlag.animation, Color.White);
+                _spriteBatch.Draw(brick1, brick1Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
+                _spriteBatch.Draw(brick2, brick2Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
+                _spriteBatch.Draw(brick3, brick3Pos, null, Color.White, angle, orgin, 1.0f, SpriteEffects.None, 1);
+                _spriteBatch.Draw(coin1, coin1Pos, coinAnim, Color.White);
+                _spriteBatch.Draw(player.texture, player.position, player.animation, Color.White);
+                _spriteBatch.Draw(health, healthPos, lifeAnim, Color.White);
+                //_spriteBatch.DrawString(stratum2bold45, "Score: " + lastScore, new Vector2(20, 70), Color.Black);
+                //_spriteBatch.DrawString(stratum2bold45, "Highscores:\n" + string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + ": " + c.Value).ToArray()), new Vector2(20, 200), Color.Black);
+
+                if (showFPS == true)
+                {
+                    _spriteBatch.DrawString(notoSansBold, "FPS: " + fps.ToString("0"), new Vector2((ResolutionNativeWidth - 85), 10), Color.White, angle1, orgin1, 1.0f, SpriteEffects.None, 1);
+                    _spriteBatch.DrawString(notoSansBold, frametime.ToString("0.0") + " ms", new Vector2((ResolutionNativeWidth - 85), 30), Color.White, angle1, orgin1, 1.0f, SpriteEffects.None, 1);
+                }
+                _spriteBatch.End();
+            }
+
+            if (gameState == 2)
+            {
+                _spriteBatch.Begin(transformMatrix: ResolutionScale);
+                _spriteBatch.Draw(winnerScreen, new Vector2(0, 0), null, Color.White);
+                _spriteBatch.DrawString(stratum2bold95, lastScore.ToString(), new Vector2(1130, 285), Color.White);
+                _spriteBatch.DrawString(stratum2bold45, string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + " - " + c.Value).ToArray()), new Vector2(885, 655), Color.White);
+                _spriteBatch.End();
+            }
+
+            if (gameState == 3)
+            {
+                _spriteBatch.Begin(transformMatrix: ResolutionScale);
+                _spriteBatch.Draw(loserScreen, new Vector2(0, 0), null, Color.White);
+                _spriteBatch.DrawString(stratum2bold95, lastScore.ToString(), new Vector2(1130, 285), Color.White);
+                _spriteBatch.DrawString(stratum2bold45, string.Join("\n", _scoreManager.Highscores.Select(c => c.PlayerName + " - " + c.Value).ToArray()), new Vector2(885, 655), Color.White);
+                _spriteBatch.End();
             }
 
             // Used for debugging, e.g.: printing value
-            //_spriteBatch.DrawString(font, "Debug: " + ResolutionTargetHeight, new Vector2(20, 720), Color.Black);
+            //_spriteBatch.DrawString(font, "Debug: " + value, new Vector2(20, 720), Color.Black);
 
-            _spriteBatch.End();
+
 
             base.Draw(gameTime);
         }

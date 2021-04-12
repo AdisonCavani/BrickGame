@@ -29,7 +29,7 @@ namespace BrickGame
         public void Update(GameTime gameTime, ContentManager Content)
         {
             position += velocity;
-            rectangle = new Rectangle((int)position.X, (int)position.Y, (texture.Width / 3), texture.Height);
+            rectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width / 3, texture.Height);
 
 
             if (Keyboard.GetState().IsKeyDown(Keys.Right))

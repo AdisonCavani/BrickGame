@@ -22,7 +22,7 @@ namespace BrickGame
         public List<Score> Scores { get; private set; }
 
         public ScoreManager()
-            : this(new List<Score>())
+            :this(new List<Score>())
         {
 
         }
@@ -59,7 +59,7 @@ namespace BrickGame
 
         public void UpdateHighscores()
         {
-            Highscores = Scores.Take(5).ToList(); // Takes the first 5 elements
+            Highscores = Scores.Take(6).ToList(); // Takes the first 6 elements
         }
 
         public static void Save(ScoreManager scoreManger)
