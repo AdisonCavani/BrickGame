@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# CS0649: Field 'BrickGame.background1Pos' is never assigned to, and will always have its default value
+dotnet_diagnostic.CS0649.severity = none

@@ -14,13 +14,24 @@ namespace BrickGame
             texture = newTexture;
             position = newPosition;
 
-            rectangle = new Rectangle((int)position.X, (int)position.Y,
-                texture.Width, texture.Height);
+            rectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width, texture.Height);
         }
 
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(texture, rectangle, Color.White);
         }
+    }
+}
+
+static class RectangleHelper
+{
+    const int penetrationMargin = 5;
+    public static bool isOnTopOf(this Rectangle r1, Rectangle r2)
+    {
+        return (r1.Bottom >= r2.Top - penetrationMargin &&
+            r1.Bottom <= r2.Top + 5 &&
+            r1.Right >= r2.Left + 25 && // Left
+            r1.Left <= r2.Right - 20); // Right
     }
 }

@@ -31,7 +31,6 @@ namespace BrickGame
             position += velocity;
             rectangle = new Rectangle((int)position.X, (int)position.Y, (texture.Width / 3), texture.Height);
 
-
             if (Keyboard.GetState().IsKeyDown(Keys.Right))
             {
                 velocity.X = 5f;
