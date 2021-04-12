@@ -43,13 +43,17 @@ namespace BrickGame
 
         Texture2D brick1;
         Vector2 brick1Pos;
+        Rectangle brick1Rect;
         Texture2D brick2;
         Vector2 brick2Pos;
+        Rectangle brick2Rect;
         Texture2D brick3;
         Vector2 brick3Pos;
+        Rectangle brick3Rect;
 
         Texture2D coin1;
         Vector2 coin1Pos;
+        Rectangle coin1Rect;
 
         // Health
         Texture2D health;
@@ -129,7 +133,7 @@ namespace BrickGame
             _graphics.SynchronizeWithVerticalRetrace = false; // Disable V-Sync
             IsFixedTimeStep = true; // Cap FPS to 60
             IsMouseVisible = true;
-            showFPS = true; // Show FPS
+            showFPS = false; // Show FPS
 
             Window.Title = "BrickGame";
         }
@@ -286,6 +290,7 @@ namespace BrickGame
 
             // Falling objects movement
             // Brick1
+            brick1Rect = new Rectangle((int)brick1Pos.X, (int)brick1Pos.Y, brick1.Width, brick1.Height);
 
             if (brick1NewLoop == true)
             {
@@ -304,7 +309,19 @@ namespace BrickGame
                 brick1NewLoop = true;
             }
 
+            if (brick1Rect.Intersects(player.rectangle))
+            {
+                life -= 1;
+                brick1NewLoop = true;
+                if (life >= 1)
+                {
+                    soundEffects[2].CreateInstance().Play();
+                }
+            }
+
             // Brick2
+            brick2Rect = new Rectangle((int)brick2Pos.X, (int)brick2Pos.Y, brick2.Width, brick2.Height);
+
             if (brick2NewLoop == true)
             {
                 brick2Speed = drawBrickSpeed.Speed2();
@@ -322,7 +339,19 @@ namespace BrickGame
                 brick2NewLoop = true;
             }
 
+            if (brick2Rect.Intersects(player.rectangle))
+            {
+                life -= 1;
+                brick2NewLoop = true;
+                if (life >= 1)
+                {
+                    soundEffects[2].CreateInstance().Play();
+                }
+            }
+
             // Brick3
+            brick3Rect = new Rectangle((int)brick3Pos.X, (int)brick3Pos.Y, brick3.Width, brick3.Height);
+
             if (brick3NewLoop == true)
             {
                 brick3Speed = drawBrickSpeed.Speed3();
@@ -340,8 +369,19 @@ namespace BrickGame
                 brick3NewLoop = true;
             }
 
+            if (brick3Rect.Intersects(player.rectangle))
+            {
+                life -= 1;
+                brick3NewLoop = true;
+                if (life >= 1)
+                {
+                    soundEffects[2].CreateInstance().Play();
+                }
+            }
 
             // Coin1
+            coin1Rect = new Rectangle((int)coin1Pos.X, (int)coin1Pos.Y, coin1.Width / 10, coin1.Height);
+
             if (coin1NewLoop == true)
             {
                 coin1Speed = drawCoinSpeed.Speed1();
@@ -358,49 +398,10 @@ namespace BrickGame
                 coin1NewLoop = true;
             }
 
-            // End of "Falling objects movement"
-
-
-            // Colision
-
-            // Brick1
-            if ((brick1Pos.Y + 44 > player.position.Y) && (brick1Pos.X + 57 > player.position.X) && (brick1Pos.X < player.position.X + 48) && (player.position.Y >= brick1Pos.Y))
+            if (coin1Rect.Intersects(player.rectangle))
             {
-                brick1NewLoop = true;
-                life -= 1;
-                if (life >= 1)
-                {
-                    soundEffects[2].CreateInstance().Play();
-                }
-            }
-
-            // Brick 2
-            if ((brick2Pos.Y + 44 > player.position.Y) && (brick2Pos.X + 57 > player.position.X) && (brick2Pos.X < player.position.X + 48) && (player.position.Y >= brick2Pos.Y))
-            {
-                brick2NewLoop = true;
-                life -= 1;
-                if (life >= 1)
-                {
-                    soundEffects[2].CreateInstance().Play();
-                }
-            }
-
-            // Brick3
-            if ((brick3Pos.Y + 44 > player.position.Y) && (brick3Pos.X + 57 > player.position.X) && (brick3Pos.X < player.position.X + 48) && (player.position.Y >= brick3Pos.Y))
-            {
-                brick3NewLoop = true;
-                life -= 1;
-                if (life >= 1)
-                {
-                    soundEffects[2].CreateInstance().Play();
-                }
-            }
-
-            // Coin1
-            if ((coin1Pos.Y + 47 > player.position.Y) && (coin1Pos.X + 46 > player.position.X) && (coin1Pos.X < player.position.X + 46) && (player.position.Y >= coin1Pos.Y))
-            {
-                coin1NewLoop = true;
                 score += 10;
+                coin1NewLoop = true;
                 if (life >= 1)
                 {
                     soundEffects[0].CreateInstance().Play();
@@ -519,17 +520,5 @@ namespace BrickGame
 
             base.Draw(gameTime);
         }
-    }
-}
-
-static class RectangleHelper
-{
-    const int penetrationMargin = 5;
-    public static bool isOnTopOf(this Rectangle r1, Rectangle r2)
-    {
-        return (r1.Bottom >= r2.Top - penetrationMargin &&
-            r1.Bottom <= r2.Top + 5 &&
-            r1.Right >= r2.Left + 25 && // Left
-            r1.Left <= r2.Right - 20); // Right
     }
 }
