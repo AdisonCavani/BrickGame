@@ -32,15 +32,15 @@ namespace BrickGame
             rectangle = new Rectangle((int)position.X, (int)position.Y, texture.Width / 3, texture.Height);
 
 
-            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+            if (Keyboard.GetState().IsKeyDown(Keys.Right) && position.X < 1850)
             {
-                velocity.X = 5f;
+                velocity.X = 4f;
                 texture = Content.Load<Texture2D>("textures\\heroRight");
             }
 
-            else if (Keyboard.GetState().IsKeyDown(Keys.Left))
+            else if (Keyboard.GetState().IsKeyDown(Keys.Left) && position.X >= 0)
             {
-                velocity.X = -5f;
+                velocity.X = -4f;
                 texture = Content.Load<Texture2D>("textures\\heroLeft");
             }
 

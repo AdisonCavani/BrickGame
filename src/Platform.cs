@@ -27,7 +27,7 @@ namespace BrickGame
 
 static class RectangleHelper
 {
-    const int penetrationMargin = 5;
+    const int penetrationMargin = 6;
     public static bool isOnTopOf(this Rectangle r1, Rectangle r2)
     {
         return (r1.Bottom >= r2.Top - penetrationMargin &&

@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Media;
 using Microsoft.Xna.Framework.Graphics;
+using System.Threading.Tasks;
 
 namespace BrickGame
 {
@@ -174,15 +175,34 @@ namespace BrickGame
             stratum2bold45 = Content.Load<SpriteFont>("fonts\\Stratum2Bold45");
             stratum2bold95 = Content.Load<SpriteFont>("fonts\\Stratum2Bold95");
 
-            player = new Character(Content.Load<Texture2D>("textures\\heroStop"), new Vector2(50, 590));
+            player = new Character(Content.Load<Texture2D>("textures\\heroStop"), new Vector2(50, 720));
 
-            finishFlag = new FinishFlag(Content.Load<Texture2D>("textures\\finishFlag"), new Vector2(115, 130));
+            finishFlag = new FinishFlag(Content.Load<Texture2D>("textures\\finishFlag"), new Vector2(460, 30));
 
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(30, 700)));
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(400, 580)));
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(800, 460)));
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(500, 340)));
-            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(100, 220)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform_background"), new Vector2(0, 827)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(175, 720)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(425, 630)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(710, 530)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(930, 422)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1180, 695)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1420, 590)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1675, 700)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1800, 590)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1715, 480)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1800, 370)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1715, 260)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1800, 150)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1575, 125)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1300, 350)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(1050, 240)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(720, 240)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(500, 350)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(300, 450)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(120, 520)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(30, 410)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(120, 300)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(220, 190)));
+            platforms.Add(new Platform(Content.Load<Texture2D>("textures\\platforms\\Platform2_small"), new Vector2(450, 120)));
 
             // Sounds
             soundEffects.Add(Content.Load<SoundEffect>("sounds\\CoinSoundFX"));
@@ -258,7 +278,7 @@ namespace BrickGame
 
         }
 
-        protected override void Update(GameTime gameTime)
+        protected override async void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
             {
@@ -286,6 +306,9 @@ namespace BrickGame
 
             if (previousGameState == 2 || previousGameState == 3) // Reset positions on game restart
             {
+                player.position.X = 50;
+                player.position.Y = 720;
+
                 brick1NewLoop = true;
                 brick2NewLoop = true;
                 brick3NewLoop = true;
@@ -302,6 +325,7 @@ namespace BrickGame
                 smallCloudMirrorPos.X = -880;
 
                 previousGameState = 0;
+
             }
             // TODO: Add your update logic here
 
@@ -310,13 +334,29 @@ namespace BrickGame
                 player.Update(gameTime, Content);
                 finishFlag.Update(gameTime);
 
-                if (finishFlag.rectangle.Intersects(player.rectangle))
-                {
-                    gameState = 2;
-                }
+
 
                 foreach (Platform platform in platforms)
                 {
+                    if (finishFlag.rectangle.Intersects(player.rectangle) && player.rectangle.isOnTopOf(platform.rectangle))
+                    {
+                        // ScoreManager
+                        _scoreManager.Add(new Score()
+                        {
+                            PlayerName = "Adrian",
+                            Value = score,
+                        }
+                        );
+
+                        ScoreManager.Save(_scoreManager);
+                        lastScore = score;
+                        score = 0;
+                        life = 5;
+                        // End of "ScoreManager"
+
+                        gameState = 2;
+                    }
+
                     if (player.rectangle.isOnTopOf(platform.rectangle))
                     {
                         player.velocity.Y = 0f;
@@ -324,8 +364,8 @@ namespace BrickGame
                     }
                     if (Keyboard.GetState().IsKeyDown(Keys.Space) && player.hasJumped == false && player.rectangle.isOnTopOf(platform.rectangle))
                     {
-                        player.position.Y -= 17f;
-                        player.velocity.Y = -6f;
+                        player.position.Y -= 18f;
+                        player.velocity.Y = -5f;
                         player.hasJumped = true;
                     }
                 }
@@ -338,8 +378,6 @@ namespace BrickGame
                 if (life <= 0)
                 {
                     soundEffects[1].CreateInstance().Play();
-                    player.position.X = 50;
-                    player.position.Y = 580;
 
                     // ScoreManager
                     _scoreManager.Add(new Score()
