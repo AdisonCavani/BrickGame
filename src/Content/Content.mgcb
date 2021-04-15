@@ -27,6 +27,13 @@
 /processorParam:TextureFormat=Compressed
 /build:assets/fonts/NotoSansBold.spritefont
 
+#begin assets/fonts/NotoSansBold2.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:assets/fonts/NotoSansBold2.spritefont
+
 #begin assets/fonts/Stratum2Bold45.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -244,6 +251,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:assets/textures/heroStop.png
+
+#begin assets/textures/life.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:assets/textures/life.png
 
 #begin assets/textures/platforms/Platform_background.png
 /importer:TextureImporter

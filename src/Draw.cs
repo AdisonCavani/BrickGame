@@ -51,8 +51,8 @@ namespace BrickGame.Draw
         // End of "Generate random horizontal position (X axis)"
     }
 
-    // Coin
-    class DrawCoinSpeed
+    // Life
+    class DrawAddLifeSpeed
     {
         // Generate random speed (Y axis)
 
@@ -64,7 +64,7 @@ namespace BrickGame.Draw
         // End of "Generate random speed (Y axis)"
     }
 
-    class DrawCoinPosition
+    class DrawAddLifePosition
     {
         // Generate random horizontal position (X axis)
 

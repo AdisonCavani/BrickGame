@@ -36,7 +36,7 @@ namespace BrickGame
         public void Add(Score score)
         {
             Scores.Add(score);
-            Scores = Scores.OrderByDescending(c => c.Value).ToList(); // Order list
+            Scores = Scores.OrderBy(c => c.Value).ToList(); // Order list
             UpdateHighscores();
         }
 
