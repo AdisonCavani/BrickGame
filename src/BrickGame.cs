@@ -200,7 +200,7 @@ namespace BrickGame
             soundEffects.Add(Content.Load<SoundEffect>("sounds\\GameOverSoundFX"));
             soundEffects.Add(Content.Load<SoundEffect>("sounds\\LostLifeSoundFX"));
 
-            music = Content.Load<Song>("sounds\\LegoMusic");
+            music = Content.Load<Song>("sounds\\ObvilonSoundtrack");
             MediaPlayer.Play(music);
             MediaPlayer.IsRepeating = true;
 
