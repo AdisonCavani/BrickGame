@@ -338,7 +338,7 @@ namespace BrickGame
                         // ScoreManager
                         _scoreManager.Add(new Score()
                         {
-                            PlayerName = "Adrian",
+                            PlayerName = "Player",
                             Value = (int)score,
                         }
                         );
